@@ -15,8 +15,8 @@ def part_a():
     x, y, z = Ints('x y z')
     s = Solver()
 
-    # TODO: Add constraints
-    # s.add(...)
+    # Added constraints
+    s.add(x + 2 * y == z, z > 10, x > 0, y > 0)
 
     print("=== Part (a) ===")
     if s.check() == sat:
@@ -36,8 +36,8 @@ def part_b():
     x = Int('x')
     s = Solver()
 
-    # TODO: Add the *negation* of the formula and check UNSAT
-    # s.add(...)
+    # Added the *negation* of the formula and check UNSAT
+    s.add(x > 5, x <= 3)
 
     print("=== Part (b) ===")
     result = s.check()
@@ -67,8 +67,8 @@ def part_c():
     f = Function('f', S, S)
     s = Solver()
 
-    # TODO: Add the three constraints
-    # s.add(...)
+    # Added three constraints
+    s.add(f(f(x)) == x, f(f(f(x))) == x, f(x) != x)
 
     print("=== Part (c) ===")
     result = s.check()
