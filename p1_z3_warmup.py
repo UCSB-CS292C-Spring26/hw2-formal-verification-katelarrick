@@ -116,6 +116,15 @@ def part_c():
 #
 # [EXPLAIN] in a comment below: Why are these two axioms together sufficient
 # to fully characterize Store/Select behavior? (2–3 sentences)
+
+# EXPLANATION: Together these two axioms fully characterize Store/Select because
+# every read of the form Select(Store(a, i, v), j) falls into exactly one of two
+# mutually exclusive cases: either j = i (HIT — the read returns the just-
+# written value v) or j != i (MISS — the write is irrelevant and the read
+# defers to the underlying array a). Since the two cases are exhaustive,
+# induction on the number of nested Store operations lets us reduce any
+# read over an arbitrary sequence of writes to either a written constant or
+# a Select on the original array, which uniquely determines its value.
 # ---------------------------------------------------------------------------
 def part_d():
     a = Array('a', IntSort(), IntSort())
@@ -139,16 +148,6 @@ def part_d():
     r2 = s2.check()
     print(f"Axiom 2 (miss): {'Valid' if r2 == unsat else 'INVALID'}")
     print()
-
-    # EXPLANATION: Together these two axioms fully characterize Store/Select because
-    # every read of the form Select(Store(a, i, v), j) falls into exactly one of two
-    # mutually exclusive cases: either j = i (HIT — the read returns the just-
-    # written value v) or j != i (MISS — the write is irrelevant and the read
-    # defers to the underlying array a). Since the two cases are exhaustive,
-    # induction on the number of nested Store operations lets us reduce any
-    # read over an arbitrary sequence of writes to either a written constant or
-    # a Select on the original array, which uniquely determines its value.
-
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
