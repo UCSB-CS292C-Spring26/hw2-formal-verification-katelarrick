@@ -37,6 +37,7 @@ def part_b():
     s = Solver()
 
     # Added the *negation* of the formula and check UNSAT
+    # !(x > 5 -> x > 3)  ==  x > 5  /\  x <= 3
     s.add(x > 5, x <= 3)
 
     print("=== Part (b) ===")
@@ -76,7 +77,33 @@ def part_c():
         print(f"SAT: {s.model()}")
     else:
         print("UNSAT")
-    # TODO: Add Z3 derivation steps below (see STEP 2 above).
+
+    # Helper: prove a lemma "hyps |= conclusion" by checking that
+    # hyps /\ ~conclusion is UNSAT.
+    def valid(label, hyps, conclusion):
+        v = Solver()
+        for h in hyps:
+            v.add(h)
+        v.add(Not(conclusion))
+        print(f"  {label}: {'holds' if v.check() == unsat else 'FAILS'}")
+
+    print("Derivation:")
+
+    # L1: apply f to both sides of f(f(x)) = x  (functional congruence).
+    valid("L1  f(f(x)) = x  =>  f(f(f(x))) = f(x)",
+          [f(f(x)) == x],
+          f(f(f(x))) == f(x))
+
+    # L2: combine L1's conclusion with the second axiom by transitivity.
+    valid("L2  f(f(f(x))) = f(x)  /\\  f(f(f(x))) = x  =>  f(x) = x",
+          [f(f(f(x))) == f(x), f(f(f(x))) == x],
+          f(x) == x)
+
+    # L3: f(x) = x contradicts the third axiom f(x) != x.
+    valid("L3  f(x) = x  /\\  f(x) != x  =>  False",
+          [f(x) == x, f(x) != x],
+          BoolVal(False))
+
     print()
 
 
@@ -97,19 +124,30 @@ def part_d():
     print("=== Part (d) ===")
 
     # Axiom 1: Read-over-write HIT
+    # !(i = j -> Select(Store(a, i, v), j) = v)
+    #    ==  i = j  /\  Select(Store(a, i, v), j) != v
     s1 = Solver()
-    # TODO: Negate axiom 1 and check UNSAT
-    # s1.add(...)
+    s1.add(i == j, Select(Store(a, i, v), j) != v)
     r1 = s1.check()
     print(f"Axiom 1 (hit):  {'Valid' if r1 == unsat else 'INVALID'}")
 
     # Axiom 2: Read-over-write MISS
+    # !(i != j -> Select(Store(a, i, v), j) = Select(a, j))
+    #    ==  i != j  /\  Select(Store(a, i, v), j) != Select(a, j)
     s2 = Solver()
-    # TODO: Negate axiom 2 and check UNSAT
-    # s2.add(...)
+    s2.add(i != j, Select(Store(a, i, v), j) != Select(a, j))
     r2 = s2.check()
     print(f"Axiom 2 (miss): {'Valid' if r2 == unsat else 'INVALID'}")
     print()
+
+    # EXPLANATION: Together these two axioms fully characterize Store/Select because
+    # every read of the form Select(Store(a, i, v), j) falls into exactly one of two
+    # mutually exclusive cases: either j = i (HIT — the read returns the just-
+    # written value v) or j != i (MISS — the write is irrelevant and the read
+    # defers to the underlying array a). Since the two cases are exhaustive,
+    # induction on the number of nested Store operations lets us reduce any
+    # read over an arbitrary sequence of writes to either a written constant or
+    # a Select on the original array, which uniquely determines its value.
 
 
 # ---------------------------------------------------------------------------
